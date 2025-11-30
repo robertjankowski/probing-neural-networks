@@ -136,11 +136,12 @@ def main(iteration):
     input_size = 28 * 28 * 1
     num_samples_per_class = 100000
 
-    # activation_fn = '_sigmoid'
-    activation_fn = '_relu'
+    # activation_fn = 'sigmoid'
+    # activation_fn = 'relu'
+    activation_fn = 'tanh'
 
     # output_folder = '/home/rjankow/data/task_complexity/fix_accuracy/corrected_new/'
-    output_folder = '/home/rjankow/data/task_complexity/fix_accuracy/for_paper/'
+    output_folder = '/home/rjankow/data/task_complexity.NOBACKUP/fix_accuracy/for_paper/'
     
     # 2 - Pullover
     # 5 - Sandal
@@ -159,8 +160,8 @@ def main(iteration):
     class1_hard = 3
     class2_hard = 1
 
-    output_folder_easy = f'{output_folder}/output_fashion_mnist_classes_{class1_easy}_{class2_easy}_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}{activation_fn}'
-    output_folder_hard = f'{output_folder}/output_fashion_mnist_classes_{class1_hard}_{class2_hard}_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}{activation_fn}'
+    output_folder_easy = f'{output_folder}/output_fashion_mnist_classes_{class1_easy}_{class2_easy}_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}_{activation_fn}'
+    output_folder_hard = f'{output_folder}/output_fashion_mnist_classes_{class1_hard}_{class2_hard}_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}_{activation_fn}'
 
     ###############################################################################
     # 1. TRAINING ON THE HARD TASK (digits 7 vs 9)
@@ -175,7 +176,7 @@ def main(iteration):
         num_samples_per_class=num_samples_per_class
     )
 
-    hard_model = SimpleMLP(input_size, hidden_sizes, num_classes_hard).to(device)
+    hard_model = SimpleMLP(input_size, hidden_sizes, num_classes_hard, activation_fn).to(device)
     hard_criterion = nn.NLLLoss()
     hard_optimizer = optim.Adam(hard_model.parameters(), lr=learning_rate)
     hard_scheduler = optim.lr_scheduler.CosineAnnealingLR(hard_optimizer, T_max=num_epochs)
@@ -212,7 +213,7 @@ def main(iteration):
         num_samples_per_class=num_samples_per_class
     )
 
-    easy_model = SimpleMLP(input_size, hidden_sizes, num_classes_easy).to(device)
+    easy_model = SimpleMLP(input_size, hidden_sizes, num_classes_easy, activation_fn).to(device)
     easy_criterion = nn.NLLLoss()
     easy_optimizer = optim.Adam(easy_model.parameters(), lr=learning_rate)
     easy_scheduler = optim.lr_scheduler.CosineAnnealingLR(easy_optimizer, T_max=num_epochs)

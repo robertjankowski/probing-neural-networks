@@ -37,6 +37,7 @@ def sparsify_mlp(
     device="cpu",
     verbose=True,
     all_fraction_non_zero=None,
+    activation_fn='relu'
 ):  
     
     if dataset == 'MNIST':
@@ -55,7 +56,7 @@ def sparsify_mlp(
         )
     
     num_classes = len(classes_to_select)
-    model = SimpleMLP(input_size, hidden_sizes, num_classes).to(device)
+    model = SimpleMLP(input_size, hidden_sizes, num_classes, activation_fn).to(device)
     
     model.load_layer_weights_from_file(f"{base_folder}/epoch_{epoch}_Layer0_edgelist.txt", layer_idx=0)
     model.load_layer_weights_from_file(f"{base_folder}/epoch_{epoch}_Layer1_edgelist.txt", layer_idx=2)
@@ -81,6 +82,11 @@ def sparsify_mlp(
         acc_random_sign = compute_accuracy(model, test_loader, device, forward_method="threshold", 
                                              threshold_method='random', fraction_non_zero=fraction_non_zero, to_signs=True, verbose=verbose)
 
-        results[fraction_non_zero] = (acc_smallest, acc_smallest_sign, acc_random, acc_random_sign)
+        acc_largest = compute_accuracy(model, test_loader, device, forward_method="threshold", 
+                                        threshold_method='highest', fraction_non_zero=fraction_non_zero, verbose=verbose)
+        acc_largest_sign = compute_accuracy(model, test_loader, device, forward_method="threshold", 
+                                             threshold_method='highest', fraction_non_zero=fraction_non_zero, to_signs=True, verbose=verbose)
+
+        results[fraction_non_zero] = (acc_smallest, acc_smallest_sign, acc_random, acc_random_sign, acc_largest, acc_largest_sign)
         
     return original_accuracy, results

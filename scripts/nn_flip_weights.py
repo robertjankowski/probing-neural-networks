@@ -36,7 +36,8 @@ def flip_weights_mlp(
     dataset='MNIST',
     device="cpu",
     verbose=True,
-):  
+    activation_fn='relu'
+):
     
     if dataset == 'MNIST':
         input_size = 28 * 28 * 1
@@ -54,7 +55,7 @@ def flip_weights_mlp(
         )
     
     num_classes = len(classes_to_select)
-    model = SimpleMLP(input_size, hidden_sizes, num_classes).to(device)
+    model = SimpleMLP(input_size, hidden_sizes, num_classes, activation_fn=activation_fn).to(device)
     
     model.load_layer_weights_from_file(f"{base_folder}/epoch_{epoch}_Layer0_edgelist.txt", layer_idx=0)
     model.load_layer_weights_from_file(f"{base_folder}/epoch_{epoch}_Layer1_edgelist.txt", layer_idx=2)

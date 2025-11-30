@@ -234,14 +234,17 @@ def main(iteration):
     input_size = 28 * 28 * 1
     num_samples_per_class = 100000
 
-    activation_fn = '_relu'
-    # activation_fn = '_sigmoid'
+    # activation_fn = 'relu'
+    # activation_fn = 'sigmoid'
+    activation_fn = 'tanh'
 
     # output_folder = '/home/rjankow/data/task_complexity/fix_accuracy/corrected/'
     # output_folder = '/home/rjankow/data/task_complexity/fix_accuracy/corrected_new/'
-    output_folder = '/home/rjankow/data/task_complexity/fix_accuracy/for_paper/'
-    output_folder_hard = f'{output_folder}/output_mnist_classes_7_9_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}{activation_fn}'
-    output_folder_easy = f'{output_folder}/output_mnist_classes_0_7_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}{activation_fn}'
+    # output_folder = '/home/rjankow/data/task_complexity/fix_accuracy/for_paper/'
+    output_folder = '/home/rjankow/data/task_complexity/fix_accuracy.NOBACKUP/for_paper/'
+    
+    output_folder_hard = f'{output_folder}/output_mnist_classes_7_9_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}_{activation_fn}'
+    output_folder_easy = f'{output_folder}/output_mnist_classes_0_7_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}_{activation_fn}'
     # output_folder_hard = f'{output_folder}/output_mnist_classes_1_6_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}'
     # output_folder_easy = f'{output_folder}/output_mnist_classes_0_6_dim_{hidden_sizes[0]}_n_{num_samples_per_class}_i{iteration}'
 
@@ -258,7 +261,7 @@ def main(iteration):
         num_samples_per_class=num_samples_per_class
     )
 
-    hard_model = SimpleMLP(input_size, hidden_sizes, num_classes_hard).to(device)
+    hard_model = SimpleMLP(input_size, hidden_sizes, num_classes_hard, activation_fn).to(device)
     hard_criterion = nn.NLLLoss()
     hard_optimizer = optim.Adam(hard_model.parameters(), lr=learning_rate)
     hard_scheduler = optim.lr_scheduler.CosineAnnealingLR(hard_optimizer, T_max=num_epochs)
@@ -273,7 +276,8 @@ def main(iteration):
         hard_criterion,
         hard_optimizer,
         hard_scheduler,
-        num_epochs
+        num_epochs,
+        verbose=True
     )
 
     hard_model.save_edgelists_to_files(9, output_folder_hard, add_network_sizes=True)
@@ -297,7 +301,7 @@ def main(iteration):
         num_samples_per_class=num_samples_per_class
     )
 
-    easy_model = SimpleMLP(input_size, hidden_sizes, num_classes_easy).to(device)
+    easy_model = SimpleMLP(input_size, hidden_sizes, num_classes_easy, activation_fn).to(device)
     easy_criterion = nn.NLLLoss()
     easy_optimizer = optim.Adam(easy_model.parameters(), lr=learning_rate)
     easy_scheduler = optim.lr_scheduler.CosineAnnealingLR(easy_optimizer, T_max=num_epochs)
@@ -327,6 +331,7 @@ def main(iteration):
         easy_optimizer,
         easy_scheduler,
         num_epochs,
+        verbose=True
     )
 
     # Let us assume that the best epoch is 9

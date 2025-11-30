@@ -6,7 +6,7 @@ from nn_bipartite_randomizations import BipartiteRandomization
 from nn_bipartite_randomizations_sparse import BipartiteRandomizationSparse
 
 class SimpleMLP(nn.Module):
-    def __init__(self, input_size, hidden_sizes, num_classes):
+    def __init__(self, input_size, hidden_sizes, num_classes, activation_fn='relu'):
         super(SimpleMLP, self).__init__()
         self.input_size = input_size
         
@@ -14,9 +14,12 @@ class SimpleMLP(nn.Module):
         in_size = input_size
         for hidden_size in hidden_sizes:
             layers.append(nn.Linear(in_size, hidden_size))
-            layers.append(nn.ReLU())
-            # layers.append(nn.Sigmoid())
-            # layers.append(nn.Tanh())
+            if activation_fn == 'relu':
+                layers.append(nn.ReLU())
+            elif activation_fn == 'sigmoid':
+                layers.append(nn.Sigmoid())
+            elif activation_fn == 'tanh':
+                layers.append(nn.Tanh())
             in_size = hidden_size
 
         layers.append(nn.Linear(in_size, num_classes))
@@ -290,7 +293,7 @@ class SimpleMLP(nn.Module):
         return x
     
 
-    def forward_with_uniform_noise(self, x, a=0.0, to_signs=False):
+    def forward_with_uniform_noise(self, x, a=0.0, to_signs=False, is_multiplicative=False):
         """
         Forward pass that injects Uniform(−a, a) noise into every nn.Linear layer’s
         nonzero weights and biases. Optionally converts them to {-1, 0, +1}.
@@ -315,8 +318,12 @@ class SimpleMLP(nn.Module):
                     noise_w = (torch.rand_like(weight) * 2 * a - a) * w_mask
                     noise_b = (torch.rand_like(bias)   * 2 * a - a) * b_mask
 
-                    weight = weight + noise_w
-                    bias   = bias   + noise_b
+                    if is_multiplicative:
+                        weight = weight * noise_w
+                        bias   = bias    * noise_b
+                    else:
+                        weight = weight + noise_w
+                        bias   = bias   + noise_b
 
                 if to_signs:
                     weight = torch.sign(weight)
